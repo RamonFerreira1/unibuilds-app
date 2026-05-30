@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { apiLogin, apiCadastro } from '../servicos/api';
 
 // Mecanismo de armazenamento seguro compatível com Web (localStorage) e Mobile (sem quebrar se ausente)
 const safeStorage = {
@@ -28,47 +29,36 @@ const safeStorage = {
   }
 };
 
-// Este é o nosso estado global para saber quem está logado no app e quais contas existem.
-// Ele persiste as contas salvas localmente para que o usuário não as perca ao atualizar a página.
+// Este é o nosso estado global para saber quem está logado no app.
+// Ele persiste apenas o nomeUsuario para que o login se mantenha ativo no F5.
 export const useEstadoAutenticacao = create(
   persist(
     (set, get) => ({
       nomeUsuario: null, // Começamos com nenhum usuário logado (null)
       
-      // Contas salvas inicialmente (padrão)
-      contasCadastradas: [
-        { nome: 'invocador', senha: '123' },
-        { nome: 'admin', senha: 'admin' }
-      ],
-      
-      // Tenta cadastrar uma nova conta
-      cadastrarConta: (nome, senha) => {
-        const contas = get().contasCadastradas;
-        const jaExiste = contas.some(c => c.nome.toLowerCase() === nome.toLowerCase());
-        
-        if (jaExiste) {
-          return { sucesso: false, mensagem: "Este nome de jogador já está em uso!" };
-        }
-        
-        set({
-          contasCadastradas: [...contas, { nome, senha }]
-        });
-        return { sucesso: true };
-      },
-      
-      // Tenta fazer o login verificando as credenciais no array de contas
-      login: (nome, senha) => {
-        const contas = get().contasCadastradas;
-        const contaValida = contas.find(
-          c => c.nome.toLowerCase() === nome.toLowerCase() && c.senha === senha
-        );
-        
-        if (contaValida) {
-          set({ nomeUsuario: contaValida.nome });
+      // Tenta cadastrar uma nova conta na API real
+      cadastrarConta: async (nome, senha) => {
+        const resposta = await apiCadastro(nome, senha);
+        if (resposta.success) {
           return { sucesso: true };
         }
-        
-        return { sucesso: false, mensagem: "Nome do jogador ou senha incorretos." };
+        return { 
+          sucesso: false, 
+          mensagem: resposta.error || "Não foi possível criar a conta. Tente novamente." 
+        };
+      },
+      
+      // Tenta fazer o login verificando as credenciais na API real
+      login: async (nome, senha) => {
+        const resposta = await apiLogin(nome, senha);
+        if (resposta.success) {
+          set({ nomeUsuario: resposta.data.nome });
+          return { sucesso: true };
+        }
+        return { 
+          sucesso: false, 
+          mensagem: resposta.error || "Nome do jogador ou senha incorretos." 
+        };
       },
       
       // Função para deslogar (limpar o nome)
@@ -77,6 +67,8 @@ export const useEstadoAutenticacao = create(
     {
       name: 'unibuilds-auth-data',
       storage: createJSONStorage(() => safeStorage),
+      // Salva apenas o nomeUsuario no local storage para segurança
+      partialize: (state) => ({ nomeUsuario: state.nomeUsuario }),
     }
   )
 );

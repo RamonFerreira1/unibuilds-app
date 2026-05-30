@@ -7,6 +7,7 @@ import championRoutes from './routes/championRoutes';
 import itemRoutes from './routes/itemRoutes';
 import runeRoutes from './routes/runeRoutes';
 import buildRoutes from './routes/buildRoutes';
+import userRoutes from './routes/userRoutes';
 
 // Carrega as variáveis de ambiente antes de qualquer coisa
 dotenv.config();
@@ -61,6 +62,8 @@ app.get('/api/health', (_req: Request, res: Response) => {
       runes: '/api/runes',
       createBuild: 'POST /api/builds',
       userBuilds: '/api/builds/user/:userId',
+      register: 'POST /api/users/register',
+      login: 'POST /api/users/login'
     },
   });
 });
@@ -70,6 +73,7 @@ app.use('/api/champions', championRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/runes', runeRoutes);
 app.use('/api/builds', buildRoutes);
+app.use('/api/users', userRoutes);
 
 // =============================================================
 // TRATAMENTO GLOBAL DE ERROS

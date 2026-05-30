@@ -19,7 +19,7 @@ export default function TelaLogin() {
   const realizarLogin = useEstadoAutenticacao(estado => estado.login);
 
   // O que acontece quando aperta o botão de login:
-  const lidarComLogin = () => {
+  const lidarComLogin = async () => {
     // Validamos se o usuário digitou alguma coisa
     if (!nome.trim() || !senha.trim()) {
       setMensagemModal("Por favor, preencha seu nome e senha para continuar sua jornada.");
@@ -27,7 +27,7 @@ export default function TelaLogin() {
       return;
     }
 
-    const resultado = realizarLogin(nome.trim(), senha);
+    const resultado = await realizarLogin(nome.trim(), senha);
     if (resultado.sucesso) {
       navegacao.replace('Principal'); // Vai para a navegação das abas (Tab)
     } else {

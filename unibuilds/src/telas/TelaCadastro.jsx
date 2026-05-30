@@ -18,7 +18,7 @@ export default function TelaCadastro() {
   const cadastrarConta = useEstadoAutenticacao(estado => estado.cadastrarConta);
   const realizarLogin = useEstadoAutenticacao(estado => estado.login);
 
-  const lidarComCadastro = () => {
+  const lidarComCadastro = async () => {
     if (!nome.trim() || !senha.trim() || !confirmarSenha.trim()) {
       setTipoAlerta('aviso');
       setMensagemModal("Por favor, preencha todos os campos para forjar sua conta.");
@@ -33,7 +33,7 @@ export default function TelaCadastro() {
       return;
     }
 
-    const resultado = cadastrarConta(nome.trim(), senha);
+    const resultado = await cadastrarConta(nome.trim(), senha);
     if (resultado.sucesso) {
       setTipoAlerta('sucesso');
       setMensagemModal(`Invocador "${nome}" cadastrado com sucesso! Prepare-se para a batalha.`);
@@ -45,10 +45,10 @@ export default function TelaCadastro() {
     }
   };
 
-  const aoFecharSucesso = () => {
+  const aoFecharSucesso = async () => {
     setModalVisivel(false);
     if (tipoAlerta === 'sucesso') {
-      realizarLogin(nome.trim(), senha);
+      await realizarLogin(nome.trim(), senha);
       navegacao.replace('Principal');
     }
   };

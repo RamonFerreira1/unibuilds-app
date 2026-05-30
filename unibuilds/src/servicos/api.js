@@ -115,3 +115,47 @@ export async function excluirBuild(buildId) {
     throw erro;
   }
 }
+
+/**
+ * Realiza o login do usuário na API
+ * @param {string} nome Nome do jogador
+ * @param {string} senha Senha
+ */
+export async function apiLogin(nome, senha) {
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/users/login`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nome, senha }),
+    });
+    const json = await resposta.json();
+    return json; // Retorna o json completo contendo success, message, data ou error
+  } catch (erro) {
+    console.error('Erro ao realizar login na API:', erro);
+    return { success: false, error: 'Não foi possível conectar ao servidor.' };
+  }
+}
+
+/**
+ * Cadastra um novo usuário na API
+ * @param {string} nome Nome do jogador
+ * @param {string} senha Senha
+ */
+export async function apiCadastro(nome, senha) {
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/users/register`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ nome, senha }),
+    });
+    const json = await resposta.json();
+    return json;
+  } catch (erro) {
+    console.error('Erro ao cadastrar usuário na API:', erro);
+    return { success: false, error: 'Não foi possível conectar ao servidor.' };
+  }
+}

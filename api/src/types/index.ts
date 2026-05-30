@@ -125,6 +125,14 @@ export interface BuildDetalhada {
   runa_chave_img: string | null;
 }
 
+// ─── Usuários ─────────────────────────────────────────────────
+
+export interface Usuario {
+  id: number;
+  nome: string;
+  senha?: string;
+}
+
 // ─── Respostas Padrão da API ──────────────────────────────────
 
 export interface ApiResponse<T> {
