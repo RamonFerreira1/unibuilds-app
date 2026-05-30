@@ -28,6 +28,9 @@ async function importDb() {
     console.log('⚡ Executando scripts SQL de criação de tabelas e sementes de campeões, itens e runas...');
     console.log('⏳ Isso pode levar entre 30 a 60 segundos. Por favor, aguarde...');
     
+    // Desativa a obrigatoriedade temporária de chaves primárias na sessão para permitir a criação das tabelas
+    await connection.query('SET SESSION sql_require_primary_key = 0;');
+
     // Executa todo o script SQL
     await connection.query(sql);
     

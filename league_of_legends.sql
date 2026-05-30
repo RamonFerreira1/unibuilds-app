@@ -29,6 +29,7 @@ SET time_zone = "+00:00";
 
 CREATE TABLE `builds` (
   `ID_build` int(11) NOT NULL,
+  `nome_build` varchar(100) DEFAULT 'Build Sem Nome',
   `ID_campeao` int(11) DEFAULT NULL,
   `item_1_ID` int(11) DEFAULT NULL,
   `item_2_ID` int(11) DEFAULT NULL,
