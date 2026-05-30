@@ -1,39 +1,77 @@
-import React from 'react';
-import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView, TouchableOpacity } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, Image, ScrollView, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { dadosCampeoes } from '../dados/dadosCampeoes';
+import { obterDetalheCampeao } from '../servicos/api';
 import { cores } from '../tema/cores';
 
-// Tela rica em detalhes mostrando lore, skins e magias de um campeão selecionado
+// Tela rica em detalhes mostrando skins e habilidades de um campeão selecionado
 export default function TelaDetalheCampeao() {
   const rota = useRoute(); // useRoute pega as informações que foram enviadas na navegação
   const navegacao = useNavigation();
   
   const idDoCampeaoSelecionado = rota.params.championId; // Pegamos o ID passado pela tela de lista
-  
-  // Procura no "banco de dados" qual é o campeão que tem esse id
-  const campeao = dadosCampeoes.find(c => c.id === idDoCampeaoSelecionado);
+  const [campeao, setCampeao] = useState(null);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
 
-  // Se por acaso tentar abrir e não existir (ex: ID errado), exibimos um erro amigável
-  if (!campeao) {
+  useEffect(() => {
+    carregarDetalhes();
+  }, [idDoCampeaoSelecionado]);
+
+  const carregarDetalhes = async () => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      const dados = await obterDetalheCampeao(idDoCampeaoSelecionado);
+      setCampeao(dados);
+    } catch (err) {
+      setErro('Não foi possível obter os detalhes do campeão.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  if (carregando) {
     return (
-      <View style={estilos.centro}><Text style={{color: cores.textoPrincipal}}>Campeão não encontrado.</Text></View>
+      <View style={estilos.centro}>
+        <ActivityIndicator size="large" color={cores.primaria} />
+        <Text style={estilos.textoLoading}>Invocando campeão...</Text>
+      </View>
     );
   }
+
+  // Se por acaso tentar abrir e não existir (ex: ID errado), exibimos um erro amigável
+  if (erro || !campeao) {
+    return (
+      <View style={estilos.centro}>
+        <Text style={estilos.textoErro}>{erro || 'Campeão não encontrado.'}</Text>
+        <TouchableOpacity style={estilos.botaoRecarregar} onPress={carregarDetalhes}>
+          <Text style={estilos.textoBotaoRecarregar}>Tentar Novamente</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  // Encontra a passiva ('P') e as habilidades normais ('Q', 'W', 'E', 'R')
+  const passiva = campeao.habilidades?.find(h => h.tecla === 'P');
+  const habilidadesAtivas = campeao.habilidades?.filter(h => h.tecla !== 'P') || [];
+  
+  // Utiliza a primeira skin como banner, ou o splash padrão
+  const imagemBanner = campeao.skins?.[0]?.splash_url || campeao.splash_url;
 
   return (
     <SafeAreaView style={estilos.areaSegura}>
       <ScrollView style={estilos.container}>
         {/* Sessão Principal: Imagem enorme no topo desfocada (Blur) para criar uma atmosfera */}
         <View style={estilos.secaoPrincipal}>
-          <Image source={{ uri: campeao.skins[0].imagem }} style={estilos.imagemFundo} blurRadius={3} />
+          <Image source={{ uri: imagemBanner }} style={estilos.imagemFundo} blurRadius={3} />
           <TouchableOpacity onPress={() => navegacao.goBack()} style={estilos.botaoVoltarAbsoluto}>
             <Ionicons name="arrow-back" size={24} color={cores.primaria} />
           </TouchableOpacity>
           <View style={estilos.camadaEscura}>
             <Text style={estilos.tituloPrincipal}>{campeao.nome.toUpperCase()}</Text>
-            <Text style={estilos.subtitulo}>{campeao.titulo.toUpperCase()}</Text>
+            <Text style={estilos.subtitulo}>{campeao.titulo ? campeao.titulo.toUpperCase() : ''}</Text>
           </View>
         </View>
 
@@ -41,48 +79,44 @@ export default function TelaDetalheCampeao() {
         <View style={estilos.secaoDados}>
           <Text style={estilos.tituloDaSecao}>HABILIDADES</Text>
           
-          {/* Mostra primeiro a passiva dele */}
-          <View style={estilos.caixaHabilidade}>
-            <Image source={{ uri: campeao.passiva.imagem }} style={estilos.iconeHabilidade} />
-            <View style={estilos.textoHabilidadeContainer}>
-              <Text style={estilos.nomeDaHabilidade}>{campeao.passiva.nome} (Passiva)</Text>
-              <Text style={estilos.descDaHabilidade}>{campeao.passiva.descricao}</Text>
+          {/* Mostra primeiro a passiva dele se existir */}
+          {passiva && (
+            <View style={estilos.caixaHabilidade}>
+              <Image source={{ uri: passiva.imagem_url }} style={estilos.iconeHabilidade} />
+              <View style={estilos.textoHabilidadeContainer}>
+                <Text style={estilos.nomeDaHabilidade}>{passiva.nome_habilidade} (Passiva)</Text>
+                <Text style={estilos.descDaHabilidade}>{passiva.descricao}</Text>
+              </View>
             </View>
-          </View>
+          )}
 
           {/* Mapeia e desenha as outras habilidades (Q, W, E, R) */}
-          {campeao.habilidades.map((hab, index) => (
+          {habilidadesAtivas.map((hab, index) => (
             <View key={index} style={estilos.caixaHabilidade}>
-              <Image source={{ uri: hab.imagem }} style={estilos.iconeHabilidade} />
+              <Image source={{ uri: hab.imagem_url }} style={estilos.iconeHabilidade} />
               <View style={estilos.textoHabilidadeContainer}>
-                <Text style={estilos.nomeDaHabilidade}>{hab.nome}</Text>
+                <Text style={estilos.nomeDaHabilidade}>{hab.nome_habilidade} ({hab.tecla})</Text>
                 <Text style={estilos.descDaHabilidade}>{hab.descricao}</Text>
               </View>
             </View>
           ))}
         </View>
 
-        {/* Lore (História) */}
-        <View style={estilos.secaoDados}>
-          <Text style={estilos.tituloDaSecao}>LORE</Text>
-          <View style={estilos.caixaLore}>
-            <Text style={estilos.textoLore}>{campeao.historia}</Text>
-          </View>
-        </View>
-
         {/* Carrossel de Skins do Campeão */}
-        <View style={estilos.secaoDados}>
-          <Text style={estilos.tituloDaSecao}>SKINS</Text>
-          {/* ScrollView horizontal permite rolar para o lado as imagens */}
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={estilos.containerDasSkins}>
-            {campeao.skins.map((skin, index) => (
-              <View key={index} style={estilos.cartaoSkin}>
-                <Image source={{ uri: skin.imagem }} style={estilos.imagemDaSkin} />
-                <Text style={estilos.nomeDaSkin}>{skin.nome}</Text>
-              </View>
-            ))}
-          </ScrollView>
-        </View>
+        {campeao.skins && campeao.skins.length > 0 && (
+          <View style={estilos.secaoDados}>
+            <Text style={estilos.tituloDaSecao}>SKINS</Text>
+            {/* ScrollView horizontal permite rolar para o lado as imagens */}
+            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={estilos.containerDasSkins}>
+              {campeao.skins.map((skin, index) => (
+                <View key={index} style={estilos.cartaoSkin}>
+                  <Image source={{ uri: skin.loading_url }} style={estilos.imagemDaSkin} />
+                  <Text style={estilos.nomeDaSkin} numberOfLines={1}>{skin.nome_skin}</Text>
+                </View>
+              ))}
+            </ScrollView>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -91,7 +125,11 @@ export default function TelaDetalheCampeao() {
 // Estilos baseados no tema Hextech/Dark
 const estilos = StyleSheet.create({
   areaSegura: { flex: 1, backgroundColor: cores.fundoPrincipal },
-  centro: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: cores.fundoPrincipal },
+  centro: { flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: cores.fundoPrincipal, padding: 20 },
+  textoLoading: { color: cores.primaria, marginTop: 15, fontSize: 16, fontFamily: 'serif' },
+  textoErro: { color: '#e74c3c', fontSize: 16, textAlign: 'center', marginBottom: 20 },
+  botaoRecarregar: { backgroundColor: cores.primaria, paddingVertical: 12, paddingHorizontal: 24, borderRadius: 8 },
+  textoBotaoRecarregar: { color: cores.fundoPrincipal, fontWeight: 'bold', fontSize: 16 },
   container: { flex: 1 },
   secaoPrincipal: {
     height: 250,
@@ -176,24 +214,13 @@ const estilos = StyleSheet.create({
     color: cores.textoSecundario,
     fontSize: 14,
   },
-  caixaLore: {
-    backgroundColor: cores.fundoSecundario,
-    borderWidth: 1,
-    borderColor: cores.primariaEscura,
-    borderRadius: 8,
-    padding: 15,
-  },
-  textoLore: {
-    color: cores.textoClaro,
-    fontSize: 14,
-    lineHeight: 22,
-  },
   containerDasSkins: {
     flexDirection: 'row',
   },
   cartaoSkin: {
     marginRight: 15,
     alignItems: 'center',
+    width: 120,
   },
   imagemDaSkin: {
     width: 120,
@@ -206,5 +233,7 @@ const estilos = StyleSheet.create({
   nomeDaSkin: {
     color: cores.textoSecundario,
     fontSize: 12,
+    textAlign: 'center',
+    width: 120,
   },
 });

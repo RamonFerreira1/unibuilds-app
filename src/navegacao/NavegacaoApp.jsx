@@ -4,8 +4,10 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import TelaAbertura from '../telas/TelaAbertura';
 import TelaLogin from '../telas/TelaLogin';
+import TelaCadastro from '../telas/TelaCadastro';
 import NavegacaoPrincipal from './NavegacaoPrincipal';
 import TelaDetalheCampeao from '../telas/TelaDetalheCampeao';
+import TelaListaBuilds from '../telas/TelaListaBuilds';
 
 // Inicializa a navegação em pilha (Stack), que permite colocar telas uma em cima da outra
 const Pilha = createNativeStackNavigator();
@@ -18,9 +20,11 @@ export default function NavegacaoApp() {
       <Pilha.Navigator screenOptions={{ headerShown: false }} initialRouteName="Abertura">
         <Pilha.Screen name="Abertura" component={TelaAbertura} />
         <Pilha.Screen name="Login" component={TelaLogin} />
+        <Pilha.Screen name="Cadastro" component={TelaCadastro} />
         {/* A tela "Principal" não é uma tela comum, ela carrega o nosso menu de abas inferior (Tabs) */}
         <Pilha.Screen name="Principal" component={NavegacaoPrincipal} />
         <Pilha.Screen name="DetalheCampeao" component={TelaDetalheCampeao} />
+        <Pilha.Screen name="ListaBuilds" component={TelaListaBuilds} />
       </Pilha.Navigator>
     </NavigationContainer>
   );

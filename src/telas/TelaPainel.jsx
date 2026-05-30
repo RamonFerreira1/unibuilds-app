@@ -41,7 +41,7 @@ export default function TelaPainel() {
         {/* Menu Dropdown que só aparece se a variável 'menuAberto' for verdadeira */}
         {menuAberto && (
           <View style={estilos.menuDropdown}>
-            <TouchableOpacity style={estilos.itemMenu}>
+            <TouchableOpacity style={estilos.itemMenu} onPress={() => { setMenuAberto(false); navegacao.navigate('ListaBuilds'); }}>
               <Ionicons name="star-outline" size={20} color={cores.primaria} />
               <Text style={estilos.textoMenu}>Favoritos</Text>
             </TouchableOpacity>

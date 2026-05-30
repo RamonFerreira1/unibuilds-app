@@ -9,8 +9,8 @@ export const useEstadoBuild = create((set) => ({
   campeaoSelecionado: null, // Campeão escolhido na lista
   setCampeao: (campeao) => set({ campeaoSelecionado: campeao }),
   
-  // Array de 6 espaços vazios para os itens (no League of Legends são 6 slots)
-  itensSelecionados: Array(6).fill(null), 
+  // Array de 4 espaços vazios para os itens (3 slots comuns + 1 bota)
+  itensSelecionados: Array(4).fill(null), 
   
   // Função para substituir um item no array pelo item escolhido
   setItem: (indice, item) => set((estado) => {

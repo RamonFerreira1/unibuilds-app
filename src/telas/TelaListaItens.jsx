@@ -1,16 +1,36 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, FlatList, Image, SafeAreaView, TouchableOpacity, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { View, Text, StyleSheet, FlatList, Image, SafeAreaView, TouchableOpacity, TextInput, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
-import { dadosItens } from '../dados/dadosItens';
+import { obterItens } from '../servicos/api';
 import { cores } from '../tema/cores';
 
 // Tela responsável por listar os itens que estão armazenados no nosso mock de dados.
 export default function TelaListaItens() {
   const navegacao = useNavigation();
   const [textoBusca, setTextoBusca] = useState('');
+  const [itens, setItens] = useState([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState(null);
 
-  const itensFiltrados = dadosItens.filter(item => 
+  useEffect(() => {
+    carregarItens();
+  }, []);
+
+  const carregarItens = async () => {
+    try {
+      setCarregando(true);
+      setErro(null);
+      const dados = await obterItens();
+      setItens(dados);
+    } catch (err) {
+      setErro('Não foi possível carregar os itens. Verifique sua conexão.');
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const itensFiltrados = itens.filter(item => 
     item.nome.toLowerCase().includes(textoBusca.toLowerCase())
   );
 
@@ -22,7 +42,9 @@ export default function TelaListaItens() {
             <Ionicons name="arrow-back" size={24} color={cores.primaria} />
           </TouchableOpacity>
           <Text style={estilos.tituloCabecalho}>ITENS</Text>
-          <View style={{ width: 24 }} />
+          <TouchableOpacity onPress={carregarItens} style={estilos.botaoVoltar}>
+            <Ionicons name="refresh" size={24} color={cores.primaria} />
+          </TouchableOpacity>
         </View>
 
         <View style={estilos.containerBusca}>
@@ -36,35 +58,48 @@ export default function TelaListaItens() {
           />
         </View>
 
-        <FlatList
-          data={itensFiltrados} // Carregamos o array filtrado
-          keyExtractor={item => item.id}
-          contentContainerStyle={estilos.conteudoLista}
-          // Para cada item do banco, a gente constrói esse cartão
-          renderItem={({ item }) => (
-            <View style={estilos.cartao}>
-              <View style={estilos.cartaoCabecalho}>
-                {/* Ícone ou Foto do Item */}
-                <Image source={{ uri: item.imagem }} style={estilos.imagem} />
-                
-                <View style={estilos.infoDoCabecalho}>
-                  <Text style={estilos.nome}>{item.nome}</Text>
-                  <Text style={estilos.preco}>{item.preco} Ouro</Text>
+        {carregando ? (
+          <View style={estilos.centro}>
+            <ActivityIndicator size="large" color={cores.primaria} />
+            <Text style={estilos.textoLoading}>Carregando arsenal...</Text>
+          </View>
+        ) : erro ? (
+          <View style={estilos.centro}>
+            <Text style={estilos.textoErro}>{erro}</Text>
+            <TouchableOpacity style={estilos.botaoRecarregar} onPress={carregarItens}>
+              <Text style={estilos.textoBotaoRecarregar}>Tentar Novamente</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FlatList
+            data={itensFiltrados} // Carregamos o array filtrado
+            keyExtractor={item => String(item.ID_riot)}
+            contentContainerStyle={estilos.conteudoLista}
+            // Para cada item do banco, a gente constrói esse cartão
+            renderItem={({ item }) => (
+              <View style={estilos.cartao}>
+                <View style={estilos.cartaoCabecalho}>
+                  {/* Ícone ou Foto do Item */}
+                  <Image source={{ uri: item.imagem_url }} style={estilos.imagem} />
+                  
+                  <View style={estilos.infoDoCabecalho}>
+                    <Text style={estilos.nome}>{item.nome}</Text>
+                    <Text style={estilos.preco}>{item.preco} Ouro</Text>
+                  </View>
                 </View>
-              </View>
 
-              {/* Uma linhazinha dourada divisória, para ficar elegante */}
-              <View style={estilos.divisoria} />
-              
-              {/* Informações detalhadas do item */}
-              <Text style={estilos.atributos}>{item.atributos}</Text>
-              <Text style={estilos.descricao}>{item.descricao}</Text>
-            </View>
-          )}
-          ListEmptyComponent={
-            <Text style={estilos.textoVazio}>Nenhum item encontrado.</Text>
-          }
-        />
+                {/* Uma linhazinha dourada divisória, para ficar elegante */}
+                <View style={estilos.divisoria} />
+                
+                {/* Informações detalhadas do item */}
+                <Text style={estilos.descricao}>{item.descricao}</Text>
+              </View>
+            )}
+            ListEmptyComponent={
+              <Text style={estilos.textoVazio}>Nenhum item encontrado.</Text>
+            }
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -147,6 +182,35 @@ const estilos = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
   },
+  centro: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: 20,
+  },
+  textoLoading: {
+    color: cores.primaria,
+    marginTop: 15,
+    fontSize: 16,
+    fontFamily: 'serif',
+  },
+  textoErro: {
+    color: '#e74c3c',
+    fontSize: 16,
+    textAlign: 'center',
+    marginBottom: 20,
+  },
+  botaoRecarregar: {
+    backgroundColor: cores.primaria,
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+  },
+  textoBotaoRecarregar: {
+    color: cores.fundoPrincipal,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
   nome: {
     fontSize: 18,
     fontWeight: 'bold',
@@ -162,12 +226,6 @@ const estilos = StyleSheet.create({
     height: 1,
     backgroundColor: cores.primariaEscura,
     marginBottom: 10,
-  },
-  atributos: {
-    fontSize: 14,
-    color: cores.destaque, // Atributos ficam no Azul Ciano para dar foco
-    marginBottom: 8,
-    lineHeight: 20,
   },
   descricao: {
     fontSize: 14,
