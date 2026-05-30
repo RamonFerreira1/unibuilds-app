@@ -1,6 +1,4 @@
-// Configuração central da API REST do UniBuilds
-// IMPORTANTE: Altere o IP para o IP do seu computador na rede local (como verificado via ipconfig)
-export const API_BASE_URL = 'http://192.168.0.110:3000/api';
+export const API_BASE_URL = 'https://unibuilds-api.onrender.com/api';
 
 /**
  * Busca a lista resumida de todos os campeões
