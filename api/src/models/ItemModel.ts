@@ -18,6 +18,9 @@ export class ItemModel {
       `SELECT ID_riot, nome, descricao, preco, imagem_url
        FROM itens
        WHERE nome IS NOT NULL AND nome != ''
+         AND preco > 0
+         AND ID_riot < 200000
+         AND nome NOT LIKE '<%>%'
        ORDER BY nome ASC`
     );
     return rows as Item[];

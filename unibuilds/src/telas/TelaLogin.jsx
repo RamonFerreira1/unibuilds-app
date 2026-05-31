@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useEstadoAutenticacao } from '../estado/useEstadoAutenticacao';
 import { cores } from '../tema/cores';
@@ -14,25 +14,30 @@ export default function TelaLogin() {
   const [senha, setSenha] = useState('');
   const [modalVisivel, setModalVisivel] = useState(false);
   const [mensagemModal, setMensagemModal] = useState('');
+  const [isCarregando, setIsCarregando] = useState(false);
   
   // Pegamos a função de login da nossa loja global (Zustand)
   const realizarLogin = useEstadoAutenticacao(estado => estado.login);
 
   // O que acontece quando aperta o botão de login:
   const lidarComLogin = async () => {
-    // Validamos se o usuário digitou alguma coisa
     if (!nome.trim() || !senha.trim()) {
       setMensagemModal("Por favor, preencha seu nome e senha para continuar sua jornada.");
       setModalVisivel(true);
       return;
     }
 
-    const resultado = await realizarLogin(nome.trim(), senha);
-    if (resultado.sucesso) {
-      navegacao.replace('Principal'); // Vai para a navegação das abas (Tab)
-    } else {
-      setMensagemModal(resultado.mensagem);
-      setModalVisivel(true);
+    setIsCarregando(true);
+    try {
+      const resultado = await realizarLogin(nome.trim(), senha);
+      if (resultado.sucesso) {
+        navegacao.replace('Principal');
+      } else {
+        setMensagemModal(resultado.mensagem);
+        setModalVisivel(true);
+      }
+    } finally {
+      setIsCarregando(false);
     }
   };
 
@@ -67,8 +72,16 @@ export default function TelaLogin() {
             onChangeText={setSenha}
           />
 
-          <TouchableOpacity style={estilos.botaoLogin} onPress={lidarComLogin}>
-            <Text style={estilos.textoBotaoLogin}>ENTRAR</Text>
+          <TouchableOpacity 
+            style={[estilos.botaoLogin, isCarregando && estilos.botaoDesabilitado]} 
+            onPress={lidarComLogin}
+            disabled={isCarregando}
+          >
+            {isCarregando ? (
+              <ActivityIndicator color={cores.fundoPrincipal} />
+            ) : (
+              <Text style={estilos.textoBotaoLogin}>ENTRAR</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -138,6 +151,11 @@ const estilos = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
+    minHeight: 52,
+    justifyContent: 'center',
+  },
+  botaoDesabilitado: {
+    opacity: 0.6,
   },
   textoBotaoLogin: {
     color: cores.fundoPrincipal,
