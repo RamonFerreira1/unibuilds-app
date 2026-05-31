@@ -19,7 +19,8 @@ export default function TelaCriadorBuild() {
     itensSelecionados, setItem,
     arvoreDeRunas, setArvoreDeRunas,
     runaPrincipal, setRunaPrincipal,
-    fragmentos, setFragmento
+    fragmentos, setFragmento,
+    resetarBuild,
   } = useEstadoBuild();
   
   const [modalAlertaVisivel, setModalAlertaVisivel] = useState(false);
@@ -107,6 +108,7 @@ export default function TelaCriadorBuild() {
       setTipoAlerta('sucesso');
       setMensagemModalAlerta(`A build "${nomeDaBuild}" foi favoritada e salva no banco de dados!`);
       setModalAlertaVisivel(true);
+      // Reseta o formulário ao fechar o modal de sucesso (veja aoFecharModalAlerta)
     } catch (erro) {
       setTipoAlerta('aviso');
       setMensagemModalAlerta("Não foi possível salvar a build. Tente novamente.");
@@ -339,7 +341,13 @@ export default function TelaCriadorBuild() {
           titulo="SISTEMA"
           tipo={tipoAlerta}
           mensagem={mensagemModalAlerta}
-          aoFechar={() => setModalAlertaVisivel(false)}
+          aoFechar={() => {
+            setModalAlertaVisivel(false);
+            // Se foi sucesso, limpa o formulário para uma nova build
+            if (tipoAlerta === 'sucesso') {
+              resetarBuild();
+            }
+          }}
         />
 
         <ModalSeletor

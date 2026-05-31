@@ -3,6 +3,12 @@ import { Modal, View, Text, StyleSheet, TouchableOpacity, FlatList, Image, TextI
 import { Ionicons } from '@expo/vector-icons';
 import { cores } from '../tema/cores';
 
+// Remove tags XML/HTML do nome (ex: <rarityLegendary>Nome</rarityLegendary> → Nome)
+const limparNome = (nome) => {
+  if (!nome) return '';
+  return nome.replace(/<[^>]*>/g, '').trim();
+};
+
 // Um Modal genérico para abrir uma gaveta de seleção com sistema de busca
 export default function ModalSeletor({ visivel, fecharModal, titulo, dados, aoSelecionar }) {
   // Estado local para guardar o que o usuário está digitando na barra de pesquisa
@@ -10,7 +16,7 @@ export default function ModalSeletor({ visivel, fecharModal, titulo, dados, aoSe
 
   // Filtra os dados: Só retorna os itens que tem o texto digitado no nome
   const dadosFiltrados = dados?.filter(item => 
-    item.nome.toLowerCase().includes(textoBusca.toLowerCase())
+    limparNome(item.nome).toLowerCase().includes(textoBusca.toLowerCase())
   ) || [];
 
   // Função auxiliar para limpar a pesquisa toda vez que o modal for fechado
@@ -69,7 +75,7 @@ export default function ModalSeletor({ visivel, fecharModal, titulo, dados, aoSe
                 }}
               >
                 <Image source={{ uri: item.imagem || item.skins?.[0]?.imagem }} style={estilos.imagemItem} />
-                <Text style={estilos.nomeItem} numberOfLines={1}>{item.nome}</Text>
+                <Text style={estilos.nomeItem} numberOfLines={1}>{limparNome(item.nome)}</Text>
               </TouchableOpacity>
             )}
           />

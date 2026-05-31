@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, StyleSheet, KeyboardAvoidingView, Platform, SafeAreaView, ActivityIndicator } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { useEstadoAutenticacao } from '../estado/useEstadoAutenticacao';
 import { cores } from '../tema/cores';
@@ -14,6 +14,7 @@ export default function TelaCadastro() {
   const [modalVisivel, setModalVisivel] = useState(false);
   const [mensagemModal, setMensagemModal] = useState('');
   const [tipoAlerta, setTipoAlerta] = useState('aviso');
+  const [isCarregando, setIsCarregando] = useState(false);
   
   const cadastrarConta = useEstadoAutenticacao(estado => estado.cadastrarConta);
   const realizarLogin = useEstadoAutenticacao(estado => estado.login);
@@ -33,15 +34,20 @@ export default function TelaCadastro() {
       return;
     }
 
-    const resultado = await cadastrarConta(nome.trim(), senha);
-    if (resultado.sucesso) {
-      setTipoAlerta('sucesso');
-      setMensagemModal(`Invocador "${nome}" cadastrado com sucesso! Prepare-se para a batalha.`);
-      setModalVisivel(true);
-    } else {
-      setTipoAlerta('aviso');
-      setMensagemModal(resultado.mensagem);
-      setModalVisivel(true);
+    setIsCarregando(true);
+    try {
+      const resultado = await cadastrarConta(nome.trim(), senha);
+      if (resultado.sucesso) {
+        setTipoAlerta('sucesso');
+        setMensagemModal(`Invocador "${nome}" cadastrado com sucesso! Prepare-se para a batalha.`);
+        setModalVisivel(true);
+      } else {
+        setTipoAlerta('aviso');
+        setMensagemModal(resultado.mensagem);
+        setModalVisivel(true);
+      }
+    } finally {
+      setIsCarregando(false);
     }
   };
 
@@ -93,8 +99,16 @@ export default function TelaCadastro() {
             onChangeText={setConfirmarSenha}
           />
 
-          <TouchableOpacity style={estilos.botaoLogin} onPress={lidarComCadastro}>
-            <Text style={estilos.textoBotaoLogin}>CRIAR CONTA</Text>
+          <TouchableOpacity 
+            style={[estilos.botaoLogin, isCarregando && estilos.botaoDesabilitado]} 
+            onPress={lidarComCadastro}
+            disabled={isCarregando}
+          >
+            {isCarregando ? (
+              <ActivityIndicator color={cores.fundoPrincipal} />
+            ) : (
+              <Text style={estilos.textoBotaoLogin}>CRIAR CONTA</Text>
+            )}
           </TouchableOpacity>
 
           <TouchableOpacity 
@@ -164,6 +178,11 @@ const estilos = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     marginTop: 10,
+    minHeight: 52,
+    justifyContent: 'center',
+  },
+  botaoDesabilitado: {
+    opacity: 0.6,
   },
   textoBotaoLogin: {
     color: cores.fundoPrincipal,

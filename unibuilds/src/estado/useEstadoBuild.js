@@ -42,4 +42,14 @@ export const useEstadoBuild = create((set) => ({
     novosFragmentos[indice] = runa;
     return { fragmentos: novosFragmentos };
   }),
+
+  // Reseta TUDO para o estado inicial — chamado após salvar a build com sucesso
+  resetarBuild: () => set({
+    nomeDaBuild: '',
+    campeaoSelecionado: null,
+    itensSelecionados: Array(4).fill(null),
+    arvoreDeRunas: null,
+    runaPrincipal: null,
+    fragmentos: [null, null, null],
+  }),
 }));
