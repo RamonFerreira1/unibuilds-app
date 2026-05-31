@@ -35,6 +35,7 @@ export default function TelaCriadorBuild() {
   const [itensApi, setItensApi] = useState([]);
   const [runasApi, setRunasApi] = useState([]);
   const [carregandoDados, setCarregandoDados] = useState(true);
+  const [erroCarregamento, setErroCarregamento] = useState(null);
   const [enviandoBuild, setEnviandoBuild] = useState(false);
 
   useEffect(() => {
@@ -44,6 +45,7 @@ export default function TelaCriadorBuild() {
   const carregarDadosFormulario = async () => {
     try {
       setCarregandoDados(true);
+      setErroCarregamento(null);
       const [dadosChamps, dadosItens, dadosRunas] = await Promise.all([
         obterCampeoes(),
         obterItens(),
@@ -54,6 +56,7 @@ export default function TelaCriadorBuild() {
       setRunasApi(dadosRunas);
     } catch (erro) {
       console.error('Erro ao carregar dados do formulário:', erro);
+      setErroCarregamento("Não foi possível carregar os dados da forja. Verifique sua conexão.");
     } finally {
       setCarregandoDados(false);
     }
@@ -206,6 +209,30 @@ export default function TelaCriadorBuild() {
         <ActivityIndicator size="large" color={cores.primaria} />
         <Text style={estilos.textoLoading}>Preparando forja...</Text>
       </View>
+    );
+  }
+
+  if (erroCarregamento) {
+    return (
+      <SafeAreaView style={estilos.areaSegura}>
+        <View style={estilos.cabecalho}>
+          <TouchableOpacity onPress={() => navegacao.goBack()} style={estilos.botaoVoltar}>
+            <Ionicons name="arrow-back" size={24} color={cores.primaria} />
+          </TouchableOpacity>
+          <Text style={estilos.tituloCabecalho}>BUILD</Text>
+          <View style={{ width: 24 }} />
+        </View>
+        <View style={estilos.centroCarregamento}>
+          <Ionicons name="warning-outline" size={60} color="#e74c3c" />
+          <Text style={[estilos.textoLoading, { color: '#e74c3c', textAlign: 'center', marginHorizontal: 20 }]}>{erroCarregamento}</Text>
+          <TouchableOpacity 
+            style={{ marginTop: 20, padding: 12, borderWidth: 1, borderColor: cores.primaria, borderRadius: 8 }}
+            onPress={carregarDadosFormulario}
+          >
+            <Text style={{ color: cores.primaria, fontWeight: 'bold' }}>Tentar Novamente</Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
     );
   }
 
