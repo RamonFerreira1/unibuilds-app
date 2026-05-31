@@ -6,7 +6,7 @@ import { cores } from '../tema/cores';
 // Remove tags XML/HTML do nome (ex: <rarityLegendary>Nome</rarityLegendary> → Nome)
 const limparNome = (nome) => {
   if (!nome) return '';
-  return nome.replace(/<[^>]*>/g, '').trim();
+  return nome.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
 };
 
 // Um Modal genérico para abrir uma gaveta de seleção com sistema de busca

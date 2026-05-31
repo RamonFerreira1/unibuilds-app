@@ -5,10 +5,21 @@ import { Ionicons } from '@expo/vector-icons';
 import { obterItens } from '../servicos/api';
 import { cores } from '../tema/cores';
 
-// Remove tags XML/HTML do nome do item (ex: <rarityLegendary>Nome</rarityLegendary> → Nome)
+// Remove tags XML/HTML do nome do item substituindo por espaço para não grudar palavras
 const limparNome = (nome) => {
   if (!nome) return '';
-  return nome.replace(/<[^>]*>/g, '').trim();
+  return nome.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim();
+};
+
+// Limpa a descrição transformando <br> em quebras de linha reais para melhor leitura
+const limparDescricao = (texto) => {
+  if (!texto) return '';
+  let limpo = texto.replace(/<br\s*\/?>/gi, '\n');
+  limpo = limpo.replace(/<\/li>|<\/p>/gi, '\n'); // garante quebra em listas
+  limpo = limpo.replace(/<[^>]*>/g, ' '); // remove as outras tags colocando espaço
+  limpo = limpo.replace(/[ \t]{2,}/g, ' '); // remove espaços duplos
+  // Limpa espaços vazios no começo/fim das linhas e remove linhas em branco extras
+  return limpo.split('\n').map(l => l.trim()).filter(l => l.length > 0).join('\n\n');
 };
 
 // Tela responsável por listar os itens que estão armazenados no nosso mock de dados.
@@ -98,7 +109,7 @@ export default function TelaListaItens() {
                 <View style={estilos.divisoria} />
                 
                 {/* Informações detalhadas do item */}
-                <Text style={estilos.descricao}>{limparNome(item.descricao)}</Text>
+                <Text style={estilos.descricao}>{limparDescricao(item.descricao)}</Text>
               </View>
             )}
             ListEmptyComponent={
