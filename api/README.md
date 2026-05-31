@@ -113,3 +113,9 @@ GET http://localhost:3000/api/champions/1
 ```bash
 GET http://localhost:3000/api/runes
 ```
+
+## Histórico de Atualizações (Backend & BD)
+
+- **Isolamento de Contas:** Adicionada coluna `user_nome` na tabela de banco de dados `builds` para permitir que cada usuário filtre e salve builds exclusivas de sua conta sem ocorrer sobreposição de dados.
+- **Autenticação Conectada:** A controladora `UserController` agora se comunica de fato com o banco de dados Aiven MySQL e barra nomes já em uso.
+- **Integração Real:** Todas as requisições (como GET Campeões, GET Runas e GET Itens) foram parametrizadas para puxar as tabelas dinamicamente, permitindo atualizações de patch sem trocar o código da API.
