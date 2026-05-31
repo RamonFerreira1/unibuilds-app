@@ -18,6 +18,7 @@ export default function TelaListaBuilds() {
   // Estados para gerenciar o Modal de Confirmação customizado do App
   const [modalConfirmacaoVisivel, setModalConfirmacaoVisivel] = useState(false);
   const [buildParaExcluir, setBuildParaExcluir] = useState(null);
+  const [isExcluindo, setIsExcluindo] = useState(false);
 
   useEffect(() => {
     carregarBuilds();
@@ -45,12 +46,14 @@ export default function TelaListaBuilds() {
 
   const lidarComConfirmacaoExclusao = async () => {
     if (!buildParaExcluir) return;
+    setIsExcluindo(true);
     try {
       await excluirBuild(buildParaExcluir.ID_build);
       setBuilds(prevBuilds => prevBuilds.filter(b => b.ID_build !== buildParaExcluir.ID_build));
     } catch (err) {
       console.error('Erro ao excluir build:', err);
     } finally {
+      setIsExcluindo(false);
       setModalConfirmacaoVisivel(false);
       setBuildParaExcluir(null);
     }
@@ -190,6 +193,7 @@ export default function TelaListaBuilds() {
           titulo="Excluir Build"
           mensagem={`Tem certeza que deseja excluir a build "${buildParaExcluir?.nome_build || 'Sem Nome'}"?`}
           aoConfirmar={lidarComConfirmacaoExclusao}
+          carregando={isExcluindo}
           aoCancelar={() => {
             setModalConfirmacaoVisivel(false);
             setBuildParaExcluir(null);
