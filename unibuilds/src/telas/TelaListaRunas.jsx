@@ -318,11 +318,12 @@ const estilos = StyleSheet.create({
   },
   linhaRuna: {
     flexDirection: 'row',
-    justifyContent: 'space-around', // Distribui os ícones com espaçamentos iguais
+    justifyContent: 'center', // Centraliza as runas se houverem poucas
   },
   itemRuna: {
     alignItems: 'center',
-    width: '30%',
+    flex: 1, // Faz com que os ícones dividam a tela em partes iguais, seja 3 ou 4 runas
+    paddingHorizontal: 2, // Espaço seguro para o texto não colar um no outro
   },
   imagemRuna: {
     width: 50,
