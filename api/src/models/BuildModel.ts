@@ -23,7 +23,7 @@ export class BuildModel {
    * sendo possível filtrar pelo front-end. Em uma versão futura com uma
    * coluna `user_id`, basta adicionar WHERE b.user_id = ? na query.
    */
-  static async findByUserId(_userId: string): Promise<BuildDetalhada[]> {
+  static async findByUserId(userId: string): Promise<BuildDetalhada[]> {
     // A query usa LEFT JOINs para não perder builds cujo item seja NULL
     const [rows] = await pool.query<RowDataPacket[]>(
       `SELECT
@@ -48,7 +48,9 @@ export class BuildModel {
        LEFT JOIN itens     i3     ON b.item_3_ID     = i3.ID_riot
        LEFT JOIN itens     bota   ON b.ID_bota       = bota.ID_riot
        LEFT JOIN runas     r_chave ON b.ID_runa_chave = r_chave.ID_runa
-       ORDER BY b.ID_build DESC`
+       WHERE b.user_nome = ?
+       ORDER BY b.ID_build DESC`,
+      [userId]
     );
 
     return rows as BuildDetalhada[];
@@ -60,6 +62,7 @@ export class BuildModel {
    */
   static async create(payload: CreateBuildPayload): Promise<number> {
     const {
+      userId,
       nomeBuild = '',
       championId,
       items = [],
@@ -75,8 +78,8 @@ export class BuildModel {
     const [result] = await pool.query<ResultSetHeader>(
       `INSERT INTO builds
         (nome_build, ID_campeao, item_1_ID, item_2_ID, item_3_ID, ID_bota,
-         ID_spell_1, ID_spell_2, ID_runa_chave, ID_runa_fenda1, ID_runa_fenda2, ID_runa_fenda3)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+         ID_spell_1, ID_spell_2, ID_runa_chave, ID_runa_fenda1, ID_runa_fenda2, ID_runa_fenda3, user_nome)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nomeBuild || 'Build Sem Nome',
         championId,
@@ -90,6 +93,7 @@ export class BuildModel {
         runaFenda1 ?? null,
         runaFenda2 ?? null,
         runaFenda3 ?? null,
+        userId || 'invocador_anonimo',
       ]
     );
 
