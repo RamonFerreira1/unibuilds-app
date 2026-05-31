@@ -5,6 +5,12 @@ import { Ionicons } from '@expo/vector-icons';
 import { obterItens } from '../servicos/api';
 import { cores } from '../tema/cores';
 
+// Remove tags XML/HTML do nome do item (ex: <rarityLegendary>Nome</rarityLegendary> → Nome)
+const limparNome = (nome) => {
+  if (!nome) return '';
+  return nome.replace(/<[^>]*>/g, '').trim();
+};
+
 // Tela responsável por listar os itens que estão armazenados no nosso mock de dados.
 export default function TelaListaItens() {
   const navegacao = useNavigation();
@@ -31,7 +37,7 @@ export default function TelaListaItens() {
   };
 
   const itensFiltrados = itens.filter(item => 
-    item.nome.toLowerCase().includes(textoBusca.toLowerCase())
+    limparNome(item.nome).toLowerCase().includes(textoBusca.toLowerCase())
   );
 
   return (
@@ -83,7 +89,7 @@ export default function TelaListaItens() {
                   <Image source={{ uri: item.imagem_url }} style={estilos.imagem} />
                   
                   <View style={estilos.infoDoCabecalho}>
-                    <Text style={estilos.nome}>{item.nome}</Text>
+                    <Text style={estilos.nome}>{limparNome(item.nome)}</Text>
                     <Text style={estilos.preco}>{item.preco} Ouro</Text>
                   </View>
                 </View>
@@ -92,7 +98,7 @@ export default function TelaListaItens() {
                 <View style={estilos.divisoria} />
                 
                 {/* Informações detalhadas do item */}
-                <Text style={estilos.descricao}>{item.descricao}</Text>
+                <Text style={estilos.descricao}>{limparNome(item.descricao)}</Text>
               </View>
             )}
             ListEmptyComponent={
