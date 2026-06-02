@@ -123,17 +123,26 @@ export async function excluirBuild(buildId) {
  */
 export async function apiLogin(nome, senha) {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+
     const resposta = await fetch(`${API_BASE_URL}/users/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ nome, senha }),
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     const json = await resposta.json();
     return json; // Retorna o json completo contendo success, message, data ou error
   } catch (erro) {
     console.error('Erro ao realizar login na API:', erro);
+    if (erro.name === 'AbortError') {
+      return { success: false, error: 'O servidor demorou muito para responder (pode estar hibernando). Aguarde 1 minuto e tente novamente.' };
+    }
     return { success: false, error: 'Não foi possível conectar ao servidor.' };
   }
 }
@@ -145,17 +154,26 @@ export async function apiLogin(nome, senha) {
  */
 export async function apiCadastro(nome, senha) {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 15000); // 15 segundos
+
     const resposta = await fetch(`${API_BASE_URL}/users/register`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ nome, senha }),
+      signal: controller.signal,
     });
+    
+    clearTimeout(timeoutId);
     const json = await resposta.json();
     return json;
   } catch (erro) {
     console.error('Erro ao cadastrar usuário na API:', erro);
+    if (erro.name === 'AbortError') {
+      return { success: false, error: 'O servidor demorou muito para responder (pode estar hibernando). Aguarde 1 minuto e tente novamente.' };
+    }
     return { success: false, error: 'Não foi possível conectar ao servidor.' };
   }
 }

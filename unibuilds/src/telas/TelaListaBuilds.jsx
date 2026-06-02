@@ -130,15 +130,22 @@ export default function TelaListaBuilds() {
           {/* Divisor vertical */}
           <View style={estilos.divisorVertical} />
 
-          {/* Runa Principal */}
+          {/* Runa Principal e Fragmentos */}
           <View style={estilos.secaoRuna}>
-            <Text style={estilos.tituloMiniSecao}>KEYSTONE</Text>
+            <Text style={estilos.tituloMiniSecao}>KEYSTONE & RUNAS</Text>
             {item.runa_chave_img ? (
               <Image source={{ uri: item.runa_chave_img }} style={estilos.imagemRuna} />
             ) : (
               <View style={[estilos.imagemRuna, estilos.runaVazia]} />
             )}
             <Text style={estilos.nomeRuna} numberOfLines={1}>{item.runa_chave_nome || 'Nenhuma'}</Text>
+            
+            {/* Fragmentos Menores */}
+            <View style={{ flexDirection: 'row', marginTop: 6, gap: 4 }}>
+              {item.runa_fenda1_img && <Image source={{ uri: item.runa_fenda1_img }} style={{ width: 18, height: 18, borderRadius: 9 }} />}
+              {item.runa_fenda2_img && <Image source={{ uri: item.runa_fenda2_img }} style={{ width: 18, height: 18, borderRadius: 9 }} />}
+              {item.runa_fenda3_img && <Image source={{ uri: item.runa_fenda3_img }} style={{ width: 18, height: 18, borderRadius: 9 }} />}
+            </View>
           </View>
         </View>
       </View>

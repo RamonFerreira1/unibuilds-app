@@ -40,7 +40,13 @@ export class BuildModel {
           bota.nome               AS bota_nome,
           bota.imagem_url         AS bota_img,
           r_chave.nome_runa       AS runa_chave_nome,
-          r_chave.imagem_url      AS runa_chave_img
+          r_chave.imagem_url      AS runa_chave_img,
+          r_fenda1.nome_runa      AS runa_fenda1_nome,
+          r_fenda1.imagem_url     AS runa_fenda1_img,
+          r_fenda2.nome_runa      AS runa_fenda2_nome,
+          r_fenda2.imagem_url     AS runa_fenda2_img,
+          r_fenda3.nome_runa      AS runa_fenda3_nome,
+          r_fenda3.imagem_url     AS runa_fenda3_img
        FROM builds b
        LEFT JOIN campeoes  c      ON b.ID_campeao    = c.ID
        LEFT JOIN itens     i1     ON b.item_1_ID     = i1.ID_riot
@@ -48,6 +54,9 @@ export class BuildModel {
        LEFT JOIN itens     i3     ON b.item_3_ID     = i3.ID_riot
        LEFT JOIN itens     bota   ON b.ID_bota       = bota.ID_riot
        LEFT JOIN runas     r_chave ON b.ID_runa_chave = r_chave.ID_runa
+       LEFT JOIN runas     r_fenda1 ON b.ID_runa_fenda1 = r_fenda1.ID_runa
+       LEFT JOIN runas     r_fenda2 ON b.ID_runa_fenda2 = r_fenda2.ID_runa
+       LEFT JOIN runas     r_fenda3 ON b.ID_runa_fenda3 = r_fenda3.ID_runa
        WHERE b.user_nome = ?
        ORDER BY b.ID_build DESC`,
       [userId]
@@ -119,7 +128,13 @@ export class BuildModel {
           bota.nome               AS bota_nome,
           bota.imagem_url         AS bota_img,
           r_chave.nome_runa       AS runa_chave_nome,
-          r_chave.imagem_url      AS runa_chave_img
+          r_chave.imagem_url      AS runa_chave_img,
+          r_fenda1.nome_runa      AS runa_fenda1_nome,
+          r_fenda1.imagem_url     AS runa_fenda1_img,
+          r_fenda2.nome_runa      AS runa_fenda2_nome,
+          r_fenda2.imagem_url     AS runa_fenda2_img,
+          r_fenda3.nome_runa      AS runa_fenda3_nome,
+          r_fenda3.imagem_url     AS runa_fenda3_img
        FROM builds b
        LEFT JOIN campeoes  c      ON b.ID_campeao    = c.ID
        LEFT JOIN itens     i1     ON b.item_1_ID     = i1.ID_riot
@@ -127,6 +142,9 @@ export class BuildModel {
        LEFT JOIN itens     i3     ON b.item_3_ID     = i3.ID_riot
        LEFT JOIN itens     bota   ON b.ID_bota       = bota.ID_riot
        LEFT JOIN runas     r_chave ON b.ID_runa_chave = r_chave.ID_runa
+       LEFT JOIN runas     r_fenda1 ON b.ID_runa_fenda1 = r_fenda1.ID_runa
+       LEFT JOIN runas     r_fenda2 ON b.ID_runa_fenda2 = r_fenda2.ID_runa
+       LEFT JOIN runas     r_fenda3 ON b.ID_runa_fenda3 = r_fenda3.ID_runa
        WHERE b.ID_build = ?`,
       [id]
     );
