@@ -63,32 +63,14 @@ export default function NavegacaoApp() {
       e.returnValue = ''; 
     };
 
-    let handlePopState;
     if (Platform.OS === 'web') {
       window.addEventListener('beforeunload', handleBeforeUnload);
-
-      // Truque avançado para PWA: injeta um estado extra no histórico para interceptar o botão físico voltar
-      window.history.pushState({ interceptadorSaida: true }, '');
-      
-      handlePopState = () => {
-        if (saindo.current) return;
-        // O evento foi disparado (usuário tentou voltar).
-        // Se a navegação interna do React Navigation disser que não há para onde voltar, é a raiz.
-        if (navigationRef.current && !navigationRef.current.canGoBack()) {
-          // Bloqueia a saída empurrando a armadilha de volta no histórico
-          window.history.pushState({ interceptadorSaida: true }, '');
-          setModalSairVisivel(true);
-        }
-      };
-      
-      window.addEventListener('popstate', handlePopState);
     }
 
     return () => {
       backHandler.remove();
       if (Platform.OS === 'web') {
         window.removeEventListener('beforeunload', handleBeforeUnload);
-        if(handlePopState) window.removeEventListener('popstate', handlePopState);
       }
     };
   }, []);
