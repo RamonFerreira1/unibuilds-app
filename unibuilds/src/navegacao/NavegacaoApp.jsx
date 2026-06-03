@@ -12,6 +12,29 @@ import TelaListaBuilds from '../telas/TelaListaBuilds';
 
 const Pilha = createNativeStackNavigator();
 
+// Configuração de rotas web (PWA) para o histórico do navegador e botão voltar do celular funcionar na Vercel
+const configuracaoDeLinks = {
+  prefixes: ['https://unibuilds.vercel.app', 'unibuilds://'],
+  config: {
+    screens: {
+      Abertura: '',
+      Login: 'login',
+      Cadastro: 'cadastro',
+      Principal: {
+        screens: {
+          Painel: 'painel',
+          Campeões: 'campeoes',
+          Itens: 'itens',
+          Runas: 'runas',
+          Builds: 'builds',
+        },
+      },
+      DetalheCampeao: 'campeao',
+      ListaBuilds: 'favoritas',
+    },
+  },
+};
+
 export default function NavegacaoApp() {
   const navigationRef = useRef(null);
 
@@ -36,7 +59,7 @@ export default function NavegacaoApp() {
       return true; // Também bloqueia o fechamento abrupto
     };
 
-    // Inscreve nosso listener para o botão de voltar do Android
+    // Inscreve nosso listener para o botão de voltar do Android (Nativo)
     const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
     // Limpa o listener se o componente for desmontado
@@ -44,7 +67,7 @@ export default function NavegacaoApp() {
   }, []);
 
   return (
-    <NavigationContainer ref={navigationRef}>
+    <NavigationContainer ref={navigationRef} linking={configuracaoDeLinks}>
       <Pilha.Navigator screenOptions={{ headerShown: false }} initialRouteName="Abertura">
         <Pilha.Screen name="Abertura" component={TelaAbertura} />
         <Pilha.Screen name="Login" component={TelaLogin} />
