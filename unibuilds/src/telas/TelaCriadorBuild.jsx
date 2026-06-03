@@ -325,6 +325,18 @@ export default function TelaCriadorBuild() {
 
         <ScrollView contentContainerStyle={estilos.conteudoRolavel}>
           
+          {buildIdEdicao && (
+            <View style={estilos.bannerEdicao}>
+              <View style={estilos.bannerTextoContainer}>
+                <Ionicons name="pencil" size={16} color="#e74c3c" />
+                <Text style={estilos.textoBannerEdicao}>Modo de Edição Ativo</Text>
+              </View>
+              <TouchableOpacity onPress={resetarBuild} style={estilos.botaoCancelarEdicao}>
+                <Text style={estilos.textoBotaoCancelar}>CANCELAR</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+
           <TextInput 
             style={estilos.inputNome} 
             placeholder="{NOME_DA_BUILD}"
@@ -496,6 +508,38 @@ const estilos = StyleSheet.create({
   conteudoRolavel: {
     padding: 20,
     paddingBottom: 40,
+  },
+  bannerEdicao: {
+    backgroundColor: 'rgba(231, 76, 60, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(231, 76, 60, 0.3)',
+    borderRadius: 8,
+    padding: 12,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  bannerTextoContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  textoBannerEdicao: {
+    color: '#e74c3c',
+    fontWeight: 'bold',
+    fontSize: 14,
+  },
+  botaoCancelarEdicao: {
+    backgroundColor: '#e74c3c',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 6,
+  },
+  textoBotaoCancelar: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: 11,
   },
   inputNome: {
     backgroundColor: cores.fundoSecundario,

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { BackHandler, Alert } from 'react-native';
+import { BackHandler, Alert, Platform } from 'react-native';
 
 import TelaAbertura from '../telas/TelaAbertura';
 import TelaLogin from '../telas/TelaLogin';
@@ -39,14 +39,13 @@ export default function NavegacaoApp() {
   const navigationRef = useRef(null);
 
   useEffect(() => {
+    // Interceptador para dispositivos móveis (Android)
     const onBackPress = () => {
-      // Tenta voltar na pilha de navegação ou no histórico das abas
       if (navigationRef.current && navigationRef.current.canGoBack()) {
         navigationRef.current.goBack();
-        return true; // Bloqueia o comportamento padrão (que é fechar o app)
+        return true; 
       }
       
-      // Se não puder voltar (ou seja, chegou na raiz do app), perguntar se quer sair
       Alert.alert(
         'Sair do UniBuilds',
         'Deseja realmente sair do aplicativo?',
@@ -56,14 +55,27 @@ export default function NavegacaoApp() {
         ]
       );
       
-      return true; // Também bloqueia o fechamento abrupto
+      return true; 
     };
 
-    // Inscreve nosso listener para o botão de voltar do Android (Nativo)
     const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-    // Limpa o listener se o componente for desmontado
-    return () => backHandler.remove();
+    // Interceptador para Web (PWA) ao tentar fechar a aba/aplicativo
+    const handleBeforeUnload = (e) => {
+      e.preventDefault();
+      e.returnValue = ''; // Exibe o prompt padrão do navegador de confirmação de saída
+    };
+
+    if (Platform.OS === 'web') {
+      window.addEventListener('beforeunload', handleBeforeUnload);
+    }
+
+    return () => {
+      backHandler.remove();
+      if (Platform.OS === 'web') {
+        window.removeEventListener('beforeunload', handleBeforeUnload);
+      }
+    };
   }, []);
 
   return (
