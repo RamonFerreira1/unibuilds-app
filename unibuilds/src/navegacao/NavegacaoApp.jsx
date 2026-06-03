@@ -11,16 +11,6 @@ import TelaDetalheCampeao from '../telas/TelaDetalheCampeao';
 import TelaListaBuilds from '../telas/TelaListaBuilds';
 import ModalConfirmacao from '../componentes/ModalConfirmacao';
 
-// Executado apenas uma vez fora do componente para inicializar o histórico PWA
-if (Platform.OS === 'web' && typeof window !== 'undefined') {
-  if (!window.history.state || !window.history.state.isAppRoot) {
-    // Substitui a raiz do histórico atual pela nossa armadilha (Index 0)
-    window.history.replaceState({ isAppRoot: true }, '');
-    // Empurra um estado vazio por cima (Index 1). O React Navigation vai usar ESSE estado vazio para iniciar.
-    window.history.pushState({}, ''); 
-  }
-}
-
 const Pilha = createNativeStackNavigator();
 
 // Configuração de rotas web (PWA) para o histórico do navegador e botão voltar do celular funcionar na Vercel
@@ -51,10 +41,8 @@ export default function NavegacaoApp() {
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const saindo = useRef(false);
 
-  const [appDesmontado, setAppDesmontado] = useState(false);
-
   useEffect(() => {
-    // Interceptador para dispositivos móveis (Android Nativo)
+    // Interceptador APENAS para dispositivos móveis nativos (Android/APK)
     const onBackPress = () => {
       if (navigationRef.current && navigationRef.current.canGoBack()) {
         navigationRef.current.goBack();
@@ -67,38 +55,21 @@ export default function NavegacaoApp() {
 
     const backHandler = BackHandler.addEventListener('hardwareBackPress', onBackPress);
 
-    // Interceptador para Web (PWA) 
+    // Interceptador padrão de fechamento de aba (Web)
     const handleBeforeUnload = (e) => {
       if (saindo.current) return;
       e.preventDefault();
       e.returnValue = ''; 
     };
 
-    let handlePopState;
     if (Platform.OS === 'web') {
       window.addEventListener('beforeunload', handleBeforeUnload);
-
-      handlePopState = (e) => {
-        if (saindo.current) return;
-
-        // Se o usuário apertou voltar e atingiu o INDEX 0 (nossa armadilha)
-        if (e.state && e.state.isAppRoot) {
-          // Mostramos o modal de saída
-          setModalSairVisivel(true);
-          // Empurramos um estado vazio imediatamente para frente (INDEX 1) novamente
-          // Isso impede que o navegador feche o app e garante que possamos interceptar o próximo voltar
-          window.history.pushState({}, '');
-        }
-      };
-
-      window.addEventListener('popstate', handlePopState);
     }
 
     return () => {
       backHandler.remove();
       if (Platform.OS === 'web') {
         window.removeEventListener('beforeunload', handleBeforeUnload);
-        if (handlePopState) window.removeEventListener('popstate', handlePopState);
       }
     };
   }, []);
@@ -107,22 +78,10 @@ export default function NavegacaoApp() {
     setModalSairVisivel(false);
     saindo.current = true;
     
-    if (Platform.OS === 'web') {
-      // Destrói o React Navigation para que ele não tente nos "resgatar" e abrir o Login
-      setAppDesmontado(true);
-      // Pede para o Android/Navegador fechar de verdade logo em seguida
-      setTimeout(() => {
-        window.history.back();
-      }, 50);
-    } else {
-      BackHandler.exitApp();
-    }
+    // Como essa função só será chamada no ambiente Nativo (já que no Web o modal nativo do navegador é que atua),
+    // podemos usar exitApp direto.
+    BackHandler.exitApp();
   };
-
-  if (appDesmontado) {
-    // Uma tela vazia antes do fechamento
-    return null;
-  }
 
   return (
     <>
@@ -137,14 +96,16 @@ export default function NavegacaoApp() {
         </Pilha.Navigator>
       </NavigationContainer>
       
-      <ModalConfirmacao
-        visivel={modalSairVisivel}
-        titulo="Sair do UniBuilds"
-        mensagem="Deseja realmente sair do aplicativo?"
-        textoConfirmar="SAIR"
-        aoCancelar={() => setModalSairVisivel(false)}
-        aoConfirmar={confirmarSaida}
-      />
+      {Platform.OS !== 'web' && (
+        <ModalConfirmacao
+          visivel={modalSairVisivel}
+          titulo="Sair do UniBuilds"
+          mensagem="Deseja realmente sair do aplicativo?"
+          textoConfirmar="SAIR"
+          aoCancelar={() => setModalSairVisivel(false)}
+          aoConfirmar={confirmarSaida}
+        />
+      )}
     </>
   );
 }
