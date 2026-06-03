@@ -2,7 +2,7 @@ import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ActivityIndicator } from 'react-native';
 import { cores } from '../tema/cores';
 
-export default function ModalConfirmacao({ visivel, titulo = "Confirmação", mensagem, aoConfirmar, aoCancelar, carregando = false }) {
+export default function ModalConfirmacao({ visivel, titulo = "Confirmação", mensagem, aoConfirmar, aoCancelar, carregando = false, textoConfirmar = "CONFIRMAR" }) {
   return (
     <Modal
       transparent={true}
@@ -24,7 +24,7 @@ export default function ModalConfirmacao({ visivel, titulo = "Confirmação", me
               {carregando ? (
                 <ActivityIndicator color={cores.textoClaro} />
               ) : (
-                <Text style={estilos.textoConfirmar}>EXCLUIR</Text>
+                <Text style={estilos.textoConfirmar}>{textoConfirmar}</Text>
               )}
             </TouchableOpacity>
           </View>
