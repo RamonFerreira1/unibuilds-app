@@ -66,14 +66,33 @@ export default function NavegacaoApp() {
       e.returnValue = ''; // Exibe o prompt padrão do navegador de confirmação de saída
     };
 
+    let handlePopState;
     if (Platform.OS === 'web') {
       window.addEventListener('beforeunload', handleBeforeUnload);
+
+      // Truque avançado para PWA: injeta um estado extra no histórico para interceptar o botão físico voltar
+      window.history.pushState({ interceptadorSaida: true }, '');
+      
+      handlePopState = () => {
+        // Se não puder voltar na navegação interna do React, significa que chegou na tela inicial
+        if (navigationRef.current && !navigationRef.current.canGoBack()) {
+          const querSair = window.confirm("Deseja realmente sair do aplicativo?");
+          if (querSair) {
+            window.history.back(); // Permite que o Android feche o app
+          } else {
+            // Re-insere o bloqueio no histórico para a próxima vez
+            window.history.pushState({ interceptadorSaida: true }, '');
+          }
+        }
+      };
+      window.addEventListener('popstate', handlePopState);
     }
 
     return () => {
       backHandler.remove();
       if (Platform.OS === 'web') {
         window.removeEventListener('beforeunload', handleBeforeUnload);
+        if(handlePopState) window.removeEventListener('popstate', handlePopState);
       }
     };
   }, []);
