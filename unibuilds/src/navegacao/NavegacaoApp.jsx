@@ -51,6 +51,8 @@ export default function NavegacaoApp() {
   const [modalSairVisivel, setModalSairVisivel] = useState(false);
   const saindo = useRef(false);
 
+  const [appDesmontado, setAppDesmontado] = useState(false);
+
   useEffect(() => {
     // Interceptador para dispositivos móveis (Android Nativo)
     const onBackPress = () => {
@@ -106,12 +108,21 @@ export default function NavegacaoApp() {
     saindo.current = true;
     
     if (Platform.OS === 'web') {
-      // Força a saída real (volta para fora do app, consumindo o Index 0)
-      window.history.back();
+      // Destrói o React Navigation para que ele não tente nos "resgatar" e abrir o Login
+      setAppDesmontado(true);
+      // Pede para o Android/Navegador fechar de verdade logo em seguida
+      setTimeout(() => {
+        window.history.back();
+      }, 50);
     } else {
       BackHandler.exitApp();
     }
   };
+
+  if (appDesmontado) {
+    // Uma tela vazia antes do fechamento
+    return null;
+  }
 
   return (
     <>
