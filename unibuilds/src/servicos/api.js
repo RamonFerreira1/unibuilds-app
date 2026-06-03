@@ -83,6 +83,29 @@ export async function criarBuild(buildPayload) {
 }
 
 /**
+ * Atualiza uma build existente no banco de dados
+ * @param {number} buildId ID da build a ser atualizada
+ * @param {object} buildPayload Dados atualizados da build
+ */
+export async function atualizarBuild(buildId, buildPayload) {
+  try {
+    const resposta = await fetch(`${API_BASE_URL}/builds/${buildId}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(buildPayload),
+    });
+    const json = await resposta.json();
+    if (!json.success) throw new Error(json.error);
+    return json.data;
+  } catch (erro) {
+    console.error(`Erro ao atualizar build ${buildId} na API:`, erro);
+    throw erro;
+  }
+}
+
+/**
  * Busca as builds de um determinado usuário
  * @param {string} userId ID do usuário
  */

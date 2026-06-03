@@ -111,6 +111,15 @@ export interface CreateBuildPayload {
 export interface BuildDetalhada {
   ID_build: number;
   nome_build: string | null;
+  ID_campeao: number | null;
+  item_1_ID: number | null;
+  item_2_ID: number | null;
+  item_3_ID: number | null;
+  ID_bota: string | null;
+  ID_runa_chave: number | null;
+  ID_runa_fenda1: number | null;
+  ID_runa_fenda2: number | null;
+  ID_runa_fenda3: number | null;
   nome_campeao: string;
   square_url: string;
   item_1_nome: string | null;

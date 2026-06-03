@@ -11,6 +11,7 @@ const router = Router();
  */
 router.post('/', BuildController.create);
 router.get('/user/:userId', BuildController.getByUserId);
+router.put('/:id', BuildController.update);
 router.delete('/:id', BuildController.delete);
 
 export default router;

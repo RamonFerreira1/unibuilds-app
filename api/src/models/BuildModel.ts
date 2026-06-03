@@ -29,6 +29,15 @@ export class BuildModel {
       `SELECT
           b.ID_build,
           b.nome_build,
+          b.ID_campeao,
+          b.item_1_ID,
+          b.item_2_ID,
+          b.item_3_ID,
+          b.ID_bota,
+          b.ID_runa_chave,
+          b.ID_runa_fenda1,
+          b.ID_runa_fenda2,
+          b.ID_runa_fenda3,
           c.nome                  AS nome_campeao,
           c.square_url            AS square_url,
           i1.nome                 AS item_1_nome,
@@ -117,6 +126,15 @@ export class BuildModel {
       `SELECT
           b.ID_build,
           b.nome_build,
+          b.ID_campeao,
+          b.item_1_ID,
+          b.item_2_ID,
+          b.item_3_ID,
+          b.ID_bota,
+          b.ID_runa_chave,
+          b.ID_runa_fenda1,
+          b.ID_runa_fenda2,
+          b.ID_runa_fenda3,
           c.nome                  AS nome_campeao,
           c.square_url            AS square_url,
           i1.nome                 AS item_1_nome,
@@ -161,6 +179,58 @@ export class BuildModel {
       'DELETE FROM builds WHERE ID_build = ?',
       [id]
     );
+    return result.affectedRows > 0;
+  }
+
+  /**
+   * Atualiza uma build existente pelo ID.
+   */
+  static async update(id: number, payload: CreateBuildPayload): Promise<boolean> {
+    const {
+      nomeBuild = '',
+      championId,
+      items = [],
+      bootId = '',
+      spell1Id = 4,   // Flash
+      spell2Id = 11,  // Golpear
+      runes = [],
+    } = payload;
+
+    const [item1, item2, item3] = items;
+    const [runaChave, runaFenda1, runaFenda2, runaFenda3] = runes;
+
+    const [result] = await pool.query<ResultSetHeader>(
+      `UPDATE builds SET
+          nome_build = ?,
+          ID_campeao = ?,
+          item_1_ID = ?,
+          item_2_ID = ?,
+          item_3_ID = ?,
+          ID_bota = ?,
+          ID_spell_1 = ?,
+          ID_spell_2 = ?,
+          ID_runa_chave = ?,
+          ID_runa_fenda1 = ?,
+          ID_runa_fenda2 = ?,
+          ID_runa_fenda3 = ?
+       WHERE ID_build = ?`,
+      [
+        nomeBuild || 'Build Sem Nome',
+        championId,
+        item1 ?? null,
+        item2 ?? null,
+        item3 ?? null,
+        bootId || '',
+        spell1Id,
+        spell2Id,
+        runaChave ?? null,
+        runaFenda1 ?? null,
+        runaFenda2 ?? null,
+        runaFenda3 ?? null,
+        id,
+      ]
+    );
+
     return result.affectedRows > 0;
   }
 }

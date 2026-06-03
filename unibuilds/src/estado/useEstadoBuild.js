@@ -6,6 +6,9 @@ export const useEstadoBuild = create((set) => ({
   nomeDaBuild: '', // Nome que o usuário digita para a build
   setNomeDaBuild: (nome) => set({ nomeDaBuild: nome }),
   
+  buildIdEdicao: null, // ID da build sendo editada (se for edição)
+  setBuildIdEdicao: (id) => set({ buildIdEdicao: id }),
+
   campeaoSelecionado: null, // Campeão escolhido na lista
   setCampeao: (campeao) => set({ campeaoSelecionado: campeao }),
   
@@ -45,6 +48,7 @@ export const useEstadoBuild = create((set) => ({
 
   // Reseta TUDO para o estado inicial — chamado após salvar a build com sucesso
   resetarBuild: () => set({
+    buildIdEdicao: null,
     nomeDaBuild: '',
     campeaoSelecionado: null,
     itensSelecionados: Array(4).fill(null),

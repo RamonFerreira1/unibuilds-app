@@ -151,4 +151,82 @@ export class BuildController {
       });
     }
   }
+
+  /**
+   * PUT /api/builds/:id
+   * Atualiza uma build existente.
+   */
+  static async update(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    const payload: CreateBuildPayload = req.body;
+
+    if (!id || isNaN(Number(id))) {
+      res.status(400).json({
+        success: false,
+        error: 'O parâmetro "id" é obrigatório e deve ser um número válido.',
+      });
+      return;
+    }
+
+    // ─── Validação dos campos obrigatórios ───────────────────
+    if (!payload.userId) {
+      res.status(400).json({
+        success: false,
+        error: 'O campo "userId" é obrigatório.',
+      });
+      return;
+    }
+
+    if (!payload.championId || isNaN(Number(payload.championId))) {
+      res.status(400).json({
+        success: false,
+        error: 'O campo "championId" é obrigatório e deve ser um número válido.',
+      });
+      return;
+    }
+
+    if (!Array.isArray(payload.items)) {
+      res.status(400).json({
+        success: false,
+        error: 'O campo "items" deve ser um array de IDs de itens.',
+      });
+      return;
+    }
+
+    if (payload.items.length > 3) {
+      res.status(400).json({
+        success: false,
+        error: 'O array "items" pode conter no máximo 3 itens.',
+      });
+      return;
+    }
+
+    // ─── Atualização da build ─────────────────────────────────────
+    try {
+      const updated = await BuildModel.update(Number(id), payload);
+
+      if (!updated) {
+        res.status(404).json({
+          success: false,
+          error: 'Build não encontrada para atualizar.',
+        });
+        return;
+      }
+
+      // Busca a build atualizada com todos os dados para retornar ao front-end
+      const buildAtualizada = await BuildModel.findById(Number(id));
+
+      res.status(200).json({
+        success: true,
+        message: 'Build atualizada com sucesso!',
+        data: buildAtualizada,
+      });
+    } catch (error) {
+      console.error(`[BuildController.update] Erro ao atualizar build ${id}:`, error);
+      res.status(500).json({
+        success: false,
+        error: 'Erro interno ao atualizar a build. Verifique se os IDs fornecidos são válidos.',
+      });
+    }
+  }
 }

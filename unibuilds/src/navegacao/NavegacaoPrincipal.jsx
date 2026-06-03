@@ -17,6 +17,7 @@ const Aba = createBottomTabNavigator();
 export default function NavegacaoPrincipal() {
   return (
     <Aba.Navigator
+      backBehavior="history" // Garante que o botão voltar do celular navegue pelo histórico de abas
       screenOptions={{
         headerShown: false, // Esconde o cabeçalho padrão das abas, pois criamos os nossos próprios
         tabBarStyle: {

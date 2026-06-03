@@ -1,19 +1,21 @@
 import React, { useState, useEffect } from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, ScrollView, SafeAreaView, Image, ActivityIndicator } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useEstadoBuild } from '../estado/useEstadoBuild';
 import { useEstadoAutenticacao } from '../estado/useEstadoAutenticacao';
 import { cores } from '../tema/cores';
 import ModalAlerta from '../componentes/ModalAlerta';
 import ModalSeletor from '../componentes/ModalSeletor';
-import { obterCampeoes, obterItens, obterRunas, criarBuild } from '../servicos/api';
+import { obterCampeoes, obterItens, obterRunas, criarBuild, atualizarBuild } from '../servicos/api';
 
 export default function TelaCriadorBuild() {
   const navegacao = useNavigation();
+  const route = useRoute();
   const { nomeUsuario } = useEstadoAutenticacao();
   
   const { 
+    buildIdEdicao, setBuildIdEdicao,
     nomeDaBuild, setNomeDaBuild,
     campeaoSelecionado, setCampeao,
     itensSelecionados, setItem,
@@ -62,6 +64,64 @@ export default function TelaCriadorBuild() {
     }
   };
 
+  useEffect(() => {
+    // Se a tela terminou de carregar e recebemos uma build para edição
+    if (!carregandoDados && route.params?.editBuild) {
+      const build = route.params.editBuild;
+      
+      setBuildIdEdicao(build.ID_build);
+      setNomeDaBuild(build.nome_build || '');
+
+      const champ = campeoesApi.find(c => c.ID === build.ID_campeao);
+      if (champ) setCampeao(champ);
+
+      const i1 = itensApi.find(i => i.ID_riot === build.item_1_ID) || null;
+      const i2 = itensApi.find(i => i.ID_riot === build.item_2_ID) || null;
+      const i3 = itensApi.find(i => i.ID_riot === build.item_3_ID) || null;
+      const bota = itensApi.find(i => String(i.ID_riot) === String(build.ID_bota)) || null;
+
+      setItem(0, i1);
+      setItem(1, i2);
+      setItem(2, i3);
+      setItem(3, bota);
+
+      let arvoreEncontrada = null;
+      let keystone = null;
+
+      runasApi.forEach(arvore => {
+        const k = arvore.keystones?.find(r => r.ID_runa === build.ID_runa_chave);
+        if (k) {
+          arvoreEncontrada = {
+            id: arvore.nome_arvore,
+            nome: arvore.nome_arvore,
+            imagem: arvore.keystones[0]?.imagem_url,
+            runasPrincipais: arvore.keystones,
+            espaco1: arvore.slots?.[0] || [],
+            espaco2: arvore.slots?.[1] || [],
+            espaco3: arvore.slots?.[2] || []
+          };
+          keystone = k;
+        }
+      });
+
+      if (arvoreEncontrada) {
+        setArvoreDeRunas(arvoreEncontrada);
+        setRunaPrincipal(keystone);
+        
+        const f1 = arvoreEncontrada.espaco1.find(r => r.ID_runa === build.ID_runa_fenda1) || null;
+        const f2 = arvoreEncontrada.espaco2.find(r => r.ID_runa === build.ID_runa_fenda2) || null;
+        const f3 = arvoreEncontrada.espaco3.find(r => r.ID_runa === build.ID_runa_fenda3) || null;
+        
+        setFragmento(0, f1);
+        setFragmento(1, f2);
+        setFragmento(2, f3);
+      }
+
+      // Limpar os parametros para não recarregar se o usuário mudar de aba e voltar
+      navegacao.setParams({ editBuild: null });
+    }
+  }, [carregandoDados, route.params?.editBuild]);
+
   const lidarComFavoritar = async () => {
     if (!nomeDaBuild.trim()) {
       setTipoAlerta('aviso');
@@ -106,10 +166,16 @@ export default function TelaCriadorBuild() {
         runes: runesIds
       };
 
-      await criarBuild(buildPayload);
+      if (buildIdEdicao) {
+        await atualizarBuild(buildIdEdicao, buildPayload);
+        setTipoAlerta('sucesso');
+        setMensagemModalAlerta(`A build "${nomeDaBuild}" foi atualizada com sucesso!`);
+      } else {
+        await criarBuild(buildPayload);
+        setTipoAlerta('sucesso');
+        setMensagemModalAlerta(`A build "${nomeDaBuild}" foi favoritada e salva no banco de dados!`);
+      }
       
-      setTipoAlerta('sucesso');
-      setMensagemModalAlerta(`A build "${nomeDaBuild}" foi favoritada e salva no banco de dados!`);
       setModalAlertaVisivel(true);
       // Reseta o formulário ao fechar o modal de sucesso (veja aoFecharModalAlerta)
     } catch (erro) {
@@ -250,7 +316,7 @@ export default function TelaCriadorBuild() {
               <ActivityIndicator size="small" color={cores.primaria} />
             ) : (
               <>
-                <Text style={estilos.textoFavoritar}>FAVORITAR BUILD</Text>
+                <Text style={estilos.textoFavoritar}>{buildIdEdicao ? 'ATUALIZAR BUILD' : 'FAVORITAR BUILD'}</Text>
                 <Ionicons name="star-outline" size={20} color={cores.primaria} />
               </>
             )}

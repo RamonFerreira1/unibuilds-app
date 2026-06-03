@@ -66,8 +66,11 @@ export default function TelaListaBuilds() {
         <View style={estilos.cabecalhoCard}>
           <Text style={estilos.nomeBuild}>{item.nome_build || 'Build Sem Nome'}</Text>
           <View style={estilos.acoesCard}>
-            <Ionicons name="star" size={16} color={cores.primaria} style={{ marginRight: 12 }} />
-            <TouchableOpacity onPress={() => confirmarExclusao(item)} style={estilos.botaoExcluir}>
+            <Ionicons name="star" size={16} color={cores.primaria} style={{ marginRight: 8 }} />
+            <TouchableOpacity onPress={() => navegacao.navigate('Builds', { editBuild: item })} style={estilos.botaoAcao}>
+              <Ionicons name="pencil" size={18} color={cores.primaria} />
+            </TouchableOpacity>
+            <TouchableOpacity onPress={() => confirmarExclusao(item)} style={estilos.botaoAcao}>
               <Ionicons name="trash-outline" size={18} color="#e74c3c" />
             </TouchableOpacity>
           </View>
@@ -281,8 +284,9 @@ const estilos = StyleSheet.create({
   acoesCard: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
   },
-  botaoExcluir: {
+  botaoAcao: {
     padding: 4,
   },
   nomeBuild: {
