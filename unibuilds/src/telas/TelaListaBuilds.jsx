@@ -67,7 +67,7 @@ export default function TelaListaBuilds() {
           <Text style={estilos.nomeBuild}>{item.nome_build || 'Build Sem Nome'}</Text>
           <View style={estilos.acoesCard}>
             <Ionicons name="star" size={16} color={cores.primaria} style={{ marginRight: 8 }} />
-            <TouchableOpacity onPress={() => navegacao.navigate('Builds', { editBuild: item })} style={estilos.botaoAcao}>
+            <TouchableOpacity onPress={() => navegacao.navigate('Principal', { screen: 'Builds', params: { editBuild: item } })} style={estilos.botaoAcao}>
               <Ionicons name="pencil" size={18} color={cores.primaria} />
             </TouchableOpacity>
             <TouchableOpacity onPress={() => confirmarExclusao(item)} style={estilos.botaoAcao}>
